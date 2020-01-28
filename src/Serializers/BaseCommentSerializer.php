@@ -9,8 +9,7 @@
 
 namespace Simonxeko\PostComments\Serializers;
 
-use Flarum\Post\CommentPost;
-use Flarum\Post\Post;
+use Simonxeko\PostComments\Comment;
 use Flarum\Api\Serializer\AbstractSerializer;
 use InvalidArgumentException;
 
@@ -24,27 +23,27 @@ class BasicPostSerializer extends AbstractSerializer
     /**
      * {@inheritdoc}
      *
-     * @param \Flarum\Post\Post $post
+     * @param \Simonxeko\PostComments\Comment $comment
      * @throws InvalidArgumentException
      */
-    protected function getDefaultAttributes($post)
+    protected function getDefaultAttributes($comment)
     {
-        if (! ($post instanceof Post)) {
+        if (! ($comment instanceof Post)) {
             throw new InvalidArgumentException(
                 get_class($this).' can only serialize instances of '.Post::class
             );
         }
 
         $attributes = [
-            'number'      => (int) $post->number,
-            'createdAt'   => $this->formatDate($post->created_at),
-            'contentType' => $post->type
+            'number'      => (int) $comment->number,
+            'createdAt'   => $this->formatDate($comment->created_at),
+            'contentType' => $comment->type
         ];
 
-        if ($post instanceof CommentPost) {
-            $attributes['contentHtml'] = $post->formatContent($this->request);
+        if ($comment instanceof Comment) {
+            $attributes['contentHtml'] = $comment->formatContent($this->request);
         } else {
-            $attributes['content'] = $post->content;
+            $attributes['content'] = $comment->content;
         }
 
         return $attributes;
@@ -53,16 +52,24 @@ class BasicPostSerializer extends AbstractSerializer
     /**
      * @return \Tobscure\JsonApi\Relationship
      */
-    protected function user($post)
+    protected function user($comment)
     {
-        return $this->hasOne($post, BasicUserSerializer::class);
+        return $this->hasOne($comment, BasicUserSerializer::class);
     }
 
     /**
      * @return \Tobscure\JsonApi\Relationship
      */
-    protected function discussion($post)
+    protected function discussion($comment)
     {
-        return $this->hasOne($post, BasicDiscussionSerializer::class);
+        return $this->hasOne($comment, BasicDiscussionSerializer::class);
+    }
+
+    /**
+     * @return \Tobscure\JsonApi\Relationship
+     */
+    protected function post($comment)
+    {
+        return $this->hasOne($comment, BasicDiscussionSerializer::class);
     }
 }

@@ -20,5 +20,13 @@ return [
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/resources/less/admin.less'),
-    new Extend\Locales(__DIR__ . '/resources/locale')
+    new Extend\Locales(__DIR__ . '/resources/locale'),
+    (new Extend\Routes('api'))
+        ->patch('/comments/{id}', 'simonxeko.postcomments.edit', Controllers\EditPollController::class)
+        ->delete('/comments/{id}', 'simonxeko.postcomments.delete', Controllers\DeletePollController::class)
+        ->patch('/comments/{id}/vote', 'simonxeko.postcomments.vote', Controllers\VotePollController::class),
+    new Extend\Compat(function (Dispatcher $events) {
+        $events->subscribe(Listeners\AddPostCommentRelationship::class);
+        $events->listen(Saving::class, Listeners\SaveCommentsToDatabase::class);
+    }),
 ];
