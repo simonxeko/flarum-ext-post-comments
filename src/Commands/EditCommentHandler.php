@@ -7,13 +7,13 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Flarum\Comment\Command;
+namespace Simonxeko\PostComments\Commands;
 
 use Flarum\Foundation\DispatchEventsTrait;
-use Flarum\Comment\CommentComment;
-use Flarum\Comment\Event\Saving;
-use Flarum\Comment\CommentRepository;
-use Flarum\Comment\CommentValidator;
+use Simonxeko\PostComments\Comment;
+use Simonxeko\PostComments\Event\Saving;
+use Simonxeko\PostComments\CommentRepository;
+use Simonxeko\PostComments\CommentValidator;
 use Flarum\User\AssertPermissionTrait;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;

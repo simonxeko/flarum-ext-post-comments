@@ -7,11 +7,11 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Flarum\Post\Command;
+namespace Simonxeko\PostComments\Commands;
 
 use Flarum\Foundation\DispatchEventsTrait;
-use Flarum\Post\Event\Deleting;
-use Flarum\Post\PostRepository;
+use Simonxeko\PostComments\Events\Deleting;
+use Simonxeko\PostComments\Events\CommentRepository;
 use Flarum\User\AssertPermissionTrait;
 use Illuminate\Contracts\Events\Dispatcher;
 
@@ -21,30 +21,30 @@ class DeleteCommentHandler
     use AssertPermissionTrait;
 
     /**
-     * @var \Flarum\Post\PostRepository
+     * @var \Simonxeko\PostComments\PostRepository
      */
-    protected $posts;
+    protected $comments;
 
     /**
      * @param Dispatcher $events
-     * @param \Flarum\Post\PostRepository $posts
+     * @param \Simonxeko\PostComments\PostRepository $comments
      */
-    public function __construct(Dispatcher $events, PostRepository $posts)
+    public function __construct(Dispatcher $events, PostRepository $comments)
     {
         $this->events = $events;
-        $this->posts = $posts;
+        $this->comments = $comments;
     }
 
     /**
-     * @param DeletePost $command
-     * @return \Flarum\Post\Post
+     * @param DeleteComment $command
+     * @return \Simonxeko\PostComments\Comment
      * @throws \Flarum\User\Exception\PermissionDeniedException
      */
-    public function handle(DeletePost $command)
+    public function handle(DeleteComment $command)
     {
         $actor = $command->actor;
 
-        $post = $this->posts->findOrFail($command->postId, $actor);
+        $post = $this->comments->findOrFail($command->postId, $actor);
 
         $this->assertCan($actor, 'delete', $post);
 

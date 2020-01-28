@@ -7,28 +7,28 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Flarum\Post\Command;
+namespace Simonxeko\PostComments\Commands;
 
 use Carbon\Carbon;
-use Flarum\Discussion\DiscussionRepository;
+use Flarum\Post\PostRepository;
 use Flarum\Foundation\DispatchEventsTrait;
 use Flarum\Notification\NotificationSyncer;
-use Flarum\Post\CommentPost;
-use Flarum\Post\Event\Saving;
-use Flarum\Post\PostValidator;
+use Simonxeko\PostComments\Comment;
+use Simonxeko\PostComments\Events\Saving;
+use Simonxeko\PostComments\PostValidator;
 use Flarum\User\AssertPermissionTrait;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
 
-class PostReplyHandler
+class PostCommentHandler
 {
     use DispatchEventsTrait;
     use AssertPermissionTrait;
 
     /**
-     * @var DiscussionRepository
+     * @var PostRepository
      */
-    protected $discussions;
+    protected $posts;
 
     /**
      * @var \Flarum\Notification\NotificationSyncer
@@ -36,24 +36,24 @@ class PostReplyHandler
     protected $notifications;
 
     /**
-     * @var \Flarum\Post\PostValidator
+     * @var \Simonxeko\PostComments\PostValidator
      */
     protected $validator;
 
     /**
      * @param Dispatcher $events
-     * @param DiscussionRepository $discussions
+     * @param PostRepository $posts
      * @param \Flarum\Notification\NotificationSyncer $notifications
      * @param PostValidator $validator
      */
     public function __construct(
         Dispatcher $events,
-        DiscussionRepository $discussions,
+        PostRepository $posts,
         NotificationSyncer $notifications,
         PostValidator $validator
     ) {
         $this->events = $events;
-        $this->discussions = $discussions;
+        $this->posts = $posts;
         $this->notifications = $notifications;
         $this->validator = $validator;
     }
@@ -72,38 +72,38 @@ class PostReplyHandler
         // view it; if not, fail with a ModelNotFound exception so we don't give
         // away the existence of the discussion. If the user is allowed to view
         // it, check if they have permission to reply.
-        $discussion = $this->discussions->findOrFail($command->discussionId, $actor);
+        $post = $this->posts->findOrFail($command->discussionId, $actor);
 
         // If this is the first post in the discussion, it's technically not a
         // "reply", so we won't check for that permission.
-        if ($discussion->post_number_index > 0) {
-            $this->assertCan($actor, 'reply', $discussion);
-        }
+        /* if ($post->post_number_index > 0) {
+            $this->assertCan($actor, 'reply', $post);
+        }*/
 
         // Create a new Post entity, persist it, and dispatch domain events.
         // Before persistence, though, fire an event to give plugins an
         // opportunity to alter the post entity based on data in the command.
-        $post = CommentPost::reply(
-            $discussion->id,
+        $comment = Comment::reply(
+            $post->id,
             Arr::get($command->data, 'attributes.content'),
             $actor->id,
             $command->ipAddress
         );
 
         if ($actor->isAdmin() && ($time = Arr::get($command->data, 'attributes.createdAt'))) {
-            $post->created_at = new Carbon($time);
+            $comment->created_at = new Carbon($time);
         }
 
         $this->events->dispatch(
-            new Saving($post, $actor, $command->data)
+            new Saving($comment, $actor, $command->data)
         );
 
-        $this->validator->assertValid($post->getAttributes());
+        $this->validator->assertValid($comment->getAttributes());
 
-        $post->save();
+        $comment->save();
 
-        $this->notifications->onePerUser(function () use ($post, $actor) {
-            $this->dispatchEventsFor($post, $actor);
+        $this->notifications->onePerUser(function () use ($comment, $actor) {
+            $this->dispatchEventsFor($comment, $actor);
         });
 
         return $post;
