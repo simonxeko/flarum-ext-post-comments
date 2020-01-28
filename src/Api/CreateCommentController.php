@@ -9,10 +9,10 @@
 
 namespace Flarum\Api\Controller;
 
-use Flarum\Api\Serializer\PostSerializer;
+use Simonxeko\PostComment\Serializers\CommentSerializer;
 use Flarum\Discussion\Command\ReadDiscussion;
-use Flarum\Post\Command\PostReply;
-use Flarum\Post\Floodgate;
+use Simonxeko\PostComment\Command\PostComment;
+use Simonxeko\PostComment\Floodgate;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,7 +23,7 @@ class CreateCommentController extends AbstractCreateController
     /**
      * {@inheritdoc}
      */
-    public $serializer = PostSerializer::class;
+    public $serializer = CommentSerializer::class;
 
     /**
      * {@inheritdoc}
@@ -41,13 +41,13 @@ class CreateCommentController extends AbstractCreateController
     protected $bus;
 
     /**
-     * @var \Flarum\Post\Floodgate
+     * @var \Simonxeko\PostComment\Floodgate
      */
     protected $floodgate;
 
     /**
      * @param Dispatcher $bus
-     * @param \Flarum\Post\Floodgate $floodgate
+     * @param \Simonxeko\PostComment\Floodgate $floodgate
      */
     public function __construct(Dispatcher $bus, Floodgate $floodgate)
     {

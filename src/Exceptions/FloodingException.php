@@ -7,7 +7,7 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Simonxeko\PostComments\Exception;
+namespace Simonxeko\PostComments\Exceptions;
 
 use Exception;
 use Flarum\Foundation\KnownError;
