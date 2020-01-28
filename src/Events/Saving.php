@@ -9,17 +9,17 @@
 
 namespace Simonxeko\PostComments\Events;
 
-use Flarum\Post\Post;
+use Simonxeko\PostComments\Comment;
 use Flarum\User\User;
 
 class Saving
 {
     /**
-     * The post that will be saved.
+     * The comment that will be saved.
      *
-     * @var \Flarum\Post\Post
+     * @var \Simonxeko\PostComments\Comment
      */
-    public $post;
+    public $comment;
 
     /**
      * The user who is performing the action.
@@ -29,20 +29,20 @@ class Saving
     public $actor;
 
     /**
-     * The attributes to update on the post.
+     * The attributes to update on the comment.
      *
      * @var array
      */
     public $data;
 
     /**
-     * @param \Flarum\Post\Post $post
+     * @param \Simonxeko\PostComments\Comment $comment
      * @param User $actor
      * @param array $data
      */
-    public function __construct(Post $post, User $actor, array $data = [])
+    public function __construct(Comment $comment, User $actor, array $data = [])
     {
-        $this->post = $post;
+        $this->comment = $comment;
         $this->actor = $actor;
         $this->data = $data;
     }

@@ -9,7 +9,7 @@
 
 namespace Simonxeko\PostComments\Events;
 
-use Flarum\Post\Post;
+use Simonxeko\PostComments\Comment;
 use Flarum\User\User;
 
 class Deleting
@@ -17,9 +17,9 @@ class Deleting
     /**
      * The post that is going to be deleted.
      *
-     * @var \Flarum\Post\Post
+     * @var \Simonxeko\PostComments\Comment
      */
-    public $post;
+    public $comment;
 
     /**
      * The user who is performing the action.
@@ -36,13 +36,13 @@ class Deleting
     public $data;
 
     /**
-     * @param \Flarum\Post\Post $post
+     * @param \Simonxeko\PostComments\Comment $comment
      * @param User $actor
      * @param array $data
      */
-    public function __construct(Post $post, User $actor, array $data)
+    public function __construct(Comment $comment, User $actor, array $data)
     {
-        $this->post = $post;
+        $this->comment = $comment;
         $this->actor = $actor;
         $this->data = $data;
     }

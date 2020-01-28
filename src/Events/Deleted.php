@@ -10,14 +10,15 @@
 namespace Simonxeko\PostComments\Events;
 
 use Flarum\Post\Post;
+use Simonxeko\PostComments\Comment;
 use Flarum\User\User;
 
 class Deleted
 {
     /**
-     * @var \Flarum\Post\Post
+     * @var \Simonxeko\PostComments\Comment
      */
-    public $post;
+    public $comment_id;
 
     /**
      * @var User
@@ -25,11 +26,11 @@ class Deleted
     public $actor;
 
     /**
-     * @param \Flarum\Post\Post $post
+     * @param \Simonxeko\PostComments\Comment $comment
      */
-    public function __construct(Post $post, User $actor = null)
+    public function __construct(Comment $comment, User $actor = null)
     {
-        $this->post = $post;
+        $this->comment = $comment;
         $this->actor = $actor;
     }
 }

@@ -15,9 +15,9 @@ use Flarum\User\User;
 class Restored
 {
     /**
-     * @var \Flarum\Post\CommentPost
+     * @var \Simonxeko\PostComments\Comment
      */
-    public $post;
+    public $comment;
 
     /**
      * @var User
@@ -25,11 +25,11 @@ class Restored
     public $actor;
 
     /**
-     * @param \Flarum\Post\CommentPost $post
+     * @param \Simonxeko\PostComments\Comment $post
      */
-    public function __construct(CommentPost $post, User $actor = null)
+    public function __construct(Comment $comment, User $actor = null)
     {
-        $this->post = $post;
+        $this->comment = $comment;
         $this->actor = $actor;
     }
 }
