@@ -25,9 +25,9 @@ return [
     (new Extend\Routes('api'))
         ->get('/comments','comments.index', Controllers\ListCommentsController::class)
         ->post('/comments','comments.create', Controllers\CreateCommentController::class)
-        ->get('/comments/{id}','comments.show', Controllers\ShowCommentController::class),
-#        ->patch('/comments/{id}','comments.update', Controllers\UpdateCommentController::class)
-#        ->delete('/comments/{id}', 'comments.delete', Controllers\DeleteCommentController::class),
+        ->get('/comments/{id}','comments.show', Controllers\ShowCommentController::class)
+        ->patch('/comments/{id}','comments.update', Controllers\UpdateCommentController::class)
+        ->delete('/comments/{id}', 'comments.delete', Controllers\DeleteCommentController::class),
     new Extend\Compat(function (Dispatcher $events) {
         $events->subscribe(Listeners\AddPostCommentRelationship::class);
         // $events->listen(Saving::class, Listeners\SaveCommentsToDatabase::class);
