@@ -11,7 +11,7 @@ namespace Simonxeko\PostComments\Commands;
 
 use Flarum\Foundation\DispatchEventsTrait;
 use Simonxeko\PostComments\Events\Deleting;
-use Simonxeko\PostComments\Events\CommentRepository;
+use Simonxeko\PostComments\CommentRepository;
 use Flarum\User\AssertPermissionTrait;
 use Illuminate\Contracts\Events\Dispatcher;
 
@@ -21,15 +21,15 @@ class DeleteCommentHandler
     use AssertPermissionTrait;
 
     /**
-     * @var \Simonxeko\PostComments\PostRepository
+     * @var \Simonxeko\PostComments\CommentRepository
      */
     protected $comments;
 
     /**
      * @param Dispatcher $events
-     * @param \Simonxeko\PostComments\PostRepository $comments
+     * @param \Simonxeko\PostComments\CommentRepository $comments
      */
-    public function __construct(Dispatcher $events, PostRepository $comments)
+    public function __construct(Dispatcher $events, CommentRepository $comments)
     {
         $this->events = $events;
         $this->comments = $comments;
@@ -43,19 +43,18 @@ class DeleteCommentHandler
     public function handle(DeleteComment $command)
     {
         $actor = $command->actor;
+        $comment = $this->comments->findOrFail($command->commentId, $actor);
 
-        $post = $this->comments->findOrFail($command->postId, $actor);
-
-        $this->assertCan($actor, 'delete', $post);
+        $this->assertCan($actor, 'delete', $comment);
 
         $this->events->dispatch(
-            new Deleting($post, $actor, $command->data)
+            new Deleting($comment, $actor, $command->data)
         );
 
-        $post->delete();
+        $comment->delete();
 
-        $this->dispatchEventsFor($post, $actor);
+        $this->dispatchEventsFor($comment, $actor);
 
-        return $post;
+        return $comment;
     }
 }

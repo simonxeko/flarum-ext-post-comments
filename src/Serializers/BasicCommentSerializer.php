@@ -11,6 +11,8 @@ namespace Simonxeko\PostComments\Serializers;
 
 use Simonxeko\PostComments\Comment;
 use Flarum\Api\Serializer\AbstractSerializer;
+use Flarum\Api\Serializer\BasicDiscussionSerializer;
+use Flarum\Api\Serializer\BasicUserSerializer;
 use InvalidArgumentException;
 
 class BasicCommentSerializer extends AbstractSerializer
@@ -18,7 +20,7 @@ class BasicCommentSerializer extends AbstractSerializer
     /**
      * {@inheritdoc}
      */
-    protected $type = 'posts';
+    protected $type = 'comments';
 
     /**
      * {@inheritdoc}
@@ -28,9 +30,9 @@ class BasicCommentSerializer extends AbstractSerializer
      */
     protected function getDefaultAttributes($comment)
     {
-        if (! ($comment instanceof Post)) {
+        if (! ($comment instanceof Comment)) {
             throw new InvalidArgumentException(
-                get_class($this).' can only serialize instances of '.Post::class
+                get_class($this).' can only serialize instances of '.Comment::class
             );
         }
 
@@ -40,11 +42,8 @@ class BasicCommentSerializer extends AbstractSerializer
             'contentType' => $comment->type
         ];
 
-        if ($comment instanceof Comment) {
-            $attributes['contentHtml'] = $comment->formatContent($this->request);
-        } else {
-            $attributes['content'] = $comment->content;
-        }
+        // TODO: rip all tags
+        $attributes['content'] = $comment->content;
 
         return $attributes;
     }

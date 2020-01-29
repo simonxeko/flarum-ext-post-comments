@@ -10,7 +10,7 @@
 namespace Simonxeko\PostComments\Controllers;
 
 use Flarum\Api\Controller\AbstractShowController;
-use Flarum\Api\Serializer\PostSerializer;
+use Simonxeko\PostComments\Serializers\CommentSerializer;
 use Simonxeko\PostComments\CommentsRepository;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;

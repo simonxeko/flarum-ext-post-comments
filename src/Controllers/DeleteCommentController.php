@@ -9,6 +9,7 @@
 
 namespace Simonxeko\PostComments\Controllers;
 
+use Flarum\Api\Controller\AbstractDeleteController;
 use Simonxeko\PostComments\Commands\DeleteComment;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Arr;

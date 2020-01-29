@@ -8,8 +8,9 @@
  */
 
 namespace Simonxeko\PostComments\Serializers;
-
-use Flarum\Post\CommentPost;
+use Flarum\Api\Serializer\BasicDiscussionSerializer;
+use Flarum\Api\Serializer\BasicUserSerializer;
+use Flarum\Api\Serializer\UserSerializer;
 use Flarum\User\Gate;
 
 class CommentSerializer extends BasicCommentSerializer
@@ -30,40 +31,44 @@ class CommentSerializer extends BasicCommentSerializer
     /**
      * {@inheritdoc}
      */
-    protected function getDefaultAttributes($post)
+    protected function getDefaultAttributes($comment)
     {
-        $attributes = parent::getDefaultAttributes($post);
+        $attributes = parent::getDefaultAttributes($comment);
 
         unset($attributes['content']);
 
         $gate = $this->gate->forUser($this->actor);
 
-        $canEdit = $gate->allows('edit', $post);
+        $canEdit = $gate->allows('edit', $comment);
 
-        if ($post instanceof CommentPost) {
+        if ($comment instanceof CommentPost) {
             if ($canEdit) {
-                $attributes['content'] = $post->content;
+                $attributes['content'] = $comment->content;
             }
-            if ($gate->allows('viewIps', $post)) {
-                $attributes['ipAddress'] = $post->ip_address;
-            }
+            /* if ($gate->allows('viewIps', $comment)) {
+                $attributes['ipAddress'] = $comment->ip_address;
+            }*/
         } else {
-            $attributes['content'] = $post->content;
+            $attributes['content'] = $comment->content;
         }
 
-        if ($post->edited_at) {
-            $attributes['editedAt'] = $this->formatDate($post->edited_at);
+        if ($comment->edited_at) {
+            $attributes['editedAt'] = $this->formatDate($comment->edited_at);
         }
 
-        if ($post->hidden_at) {
+        if ($comment->created_at) {
+            $attributes['createdAt'] = $this->formatDate($comment->created_at);
+        }
+
+        if ($comment->hidden_at) {
             $attributes['isHidden'] = true;
-            $attributes['hiddenAt'] = $this->formatDate($post->hidden_at);
+            $attributes['hiddenAt'] = $this->formatDate($comment->hidden_at);
         }
 
         $attributes += [
             'canEdit'   => $canEdit,
-            'canDelete' => $gate->allows('delete', $post),
-            'canHide'   => $gate->allows('hide', $post)
+            'canDelete' => $gate->allows('delete', $comment),
+            'canHide'   => $gate->allows('hide', $comment)
         ];
 
         return $attributes;
@@ -72,23 +77,23 @@ class CommentSerializer extends BasicCommentSerializer
     /**
      * @return \Tobscure\JsonApi\Relationship
      */
-    protected function user($post)
+    protected function user($comment)
     {
-        return $this->hasOne($post, UserSerializer::class);
+        return $this->hasOne($comment, UserSerializer::class);
     }
 
     /**
      * @return \Tobscure\JsonApi\Relationship
      */
-    protected function discussion($post)
+    protected function discussion($comment)
     {
-        return $this->hasOne($post, BasicDiscussionSerializer::class);
+        return $this->hasOne($comment, BasicDiscussionSerializer::class);
     }
 
     /**
      * @return \Tobscure\JsonApi\Relationship
      */
-    protected function editedUser($post)
+    protected function editedUser($comment)
     {
         return $this->hasOne($post, BasicUserSerializer::class);
     }

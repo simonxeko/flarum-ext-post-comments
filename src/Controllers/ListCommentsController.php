@@ -51,7 +51,7 @@ class ListCommentsController extends AbstractListController
     /**
      * @param \Simonxeko\PostComments\CommentRepository $comments
      */
-    public function __construct(PostRepository $comments)
+    public function __construct(CommentRepository $comments)
     {
         $this->comments = $comments;
     }

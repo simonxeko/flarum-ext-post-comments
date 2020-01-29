@@ -88,7 +88,8 @@ class AddPostCommentRelationship
     {
         if ($event->isController(Controller\ShowDiscussionController::class)) {
             $event->addInclude([
-                'posts.comments'
+                'posts.comments',
+                'posts.comments.user'
             ]);
         }
         if ($event->isController(Controller\ShowPostController::class)
