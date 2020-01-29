@@ -15,7 +15,7 @@ use Flarum\Foundation\DispatchEventsTrait;
 use Flarum\Notification\NotificationSyncer;
 use Simonxeko\PostComments\Comment;
 use Simonxeko\PostComments\Events\Saving;
-use Simonxeko\PostComments\PostValidator;
+use Simonxeko\PostComments\CommentValidator;
 use Flarum\User\AssertPermissionTrait;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
@@ -36,7 +36,7 @@ class PostCommentHandler
     protected $notifications;
 
     /**
-     * @var \Simonxeko\PostComments\PostValidator
+     * @var \Simonxeko\PostComments\CommentValidator
      */
     protected $validator;
 
@@ -44,13 +44,13 @@ class PostCommentHandler
      * @param Dispatcher $events
      * @param PostRepository $posts
      * @param \Flarum\Notification\NotificationSyncer $notifications
-     * @param PostValidator $validator
+     * @param CommentValidator $validator
      */
     public function __construct(
         Dispatcher $events,
         PostRepository $posts,
         NotificationSyncer $notifications,
-        PostValidator $validator
+        CommentValidator $validator
     ) {
         $this->events = $events;
         $this->posts = $posts;
@@ -59,11 +59,11 @@ class PostCommentHandler
     }
 
     /**
-     * @param PostReply $command
+     * @param PostComment $command
      * @return CommentPost
      * @throws \Flarum\User\Exception\PermissionDeniedException
      */
-    public function handle(PostReply $command)
+    public function handle(PostComment $command)
     {
         $actor = $command->actor;
 
@@ -72,7 +72,7 @@ class PostCommentHandler
         // view it; if not, fail with a ModelNotFound exception so we don't give
         // away the existence of the discussion. If the user is allowed to view
         // it, check if they have permission to reply.
-        $post = $this->posts->findOrFail($command->discussionId, $actor);
+        $post = $this->posts->findOrFail($command->postId, $actor);
 
         // If this is the first post in the discussion, it's technically not a
         // "reply", so we won't check for that permission.
@@ -84,7 +84,8 @@ class PostCommentHandler
         // Before persistence, though, fire an event to give plugins an
         // opportunity to alter the post entity based on data in the command.
         $comment = Comment::reply(
-            $post->id,
+            $command->discussionId,
+            $command->postId,
             Arr::get($command->data, 'attributes.content'),
             $actor->id,
             $command->ipAddress

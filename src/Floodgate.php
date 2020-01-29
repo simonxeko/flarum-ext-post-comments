@@ -7,13 +7,14 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Simonxek\PostComment;
+namespace Simonxeko\PostComments;
 
 use DateTime;
-use Simonxek\PostComment\Events\CheckingForFlooding;
-use Simonxek\PostComment\Exceptions\FloodingException;
+use Simonxeko\PostComments\Events\CheckingForFlooding;
+use Simonxeko\PostComments\Exceptions\FloodingException;
+use Flarum\Post\Post;
 use Flarum\User\User;
-use Illuminate\Contracts\Eventss\Dispatcher;
+use Illuminate\Contracts\Events\Dispatcher;
 
 class Floodgate
 {

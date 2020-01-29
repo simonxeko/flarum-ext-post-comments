@@ -12,9 +12,14 @@
 namespace Simonxeko\PostComments;
 
 use Flarum\Database\AbstractModel;
+use Flarum\Database\ScopeVisibilityTrait;
 use Flarum\Discussion\Discussion;
+use Flarum\Event\GetModelIsPrivate;
+use Flarum\Foundation\EventGeneratorTrait;
 use Flarum\Post\Post;
 use Flarum\User\User;
+use Carbon\Carbon;
+use Simonxeko\PostComments\Events\Posted;
 
 /**
  * @property int $id
@@ -30,6 +35,8 @@ use Flarum\User\User;
  */
 class Comment extends AbstractModel
 {
+    use EventGeneratorTrait;
+    use ScopeVisibilityTrait;
     /**
      * {@inheritdoc}
      */
@@ -49,14 +56,14 @@ class Comment extends AbstractModel
      */
     public static function build($content, $discussionId, $postId, $actorId)
     {
-        $poll = new static();
+        $comment = new static();
 
-        $poll->content = $content;
-        $poll->discussion_id = $discussionId;
-        $poll->post_id = $postId;
-        $poll->user_id = $actorId;
+        $comment->content = $content;
+        $comment->discussion_id = $discussionId;
+        $comment->post_id = $postId;
+        $comment->user_id = $actorId;
 
-        return $poll;
+        return $comment;
     }
 
     /**
@@ -81,5 +88,33 @@ class Comment extends AbstractModel
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Create a new instance in reply to a discussion.
+     *
+     * @param int $discussionId
+     * @param string $content
+     * @param int $userId
+     * @param string $ipAddress
+     * @return static
+     */
+    public static function reply($discussionId, $postId, $content, $userId, $ipAddress)
+    {
+        $comment = new static;
+
+        $comment->created_at = Carbon::now();
+        $comment->discussion_id = $discussionId;
+        $comment->post_id = $postId;
+        $comment->user_id = $userId;
+        #$comment->type = static::$type;
+        # $comment->ip_address = $ipAddress;
+
+        // Set content last, as the parsing may rely on other post attributes.
+        $comment->content = $content;
+
+        $comment->raise(new Posted($comment));
+
+        return $comment;
     }
 }

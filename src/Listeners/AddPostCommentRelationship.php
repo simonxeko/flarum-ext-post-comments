@@ -23,7 +23,7 @@ use Simonxeko\PostComments\Api\Serializers\CommentSerializer;
 use Simonxeko\PostComments\Comment;
 use Illuminate\Contracts\Events\Dispatcher;
 
-class AddDiscussionPollRelationship
+class AddPostCommentRelationship
 {
     /**
      * @param Dispatcher $events
@@ -44,7 +44,7 @@ class AddDiscussionPollRelationship
     public function getModelRelationship(GetModelRelationship $event)
     {
         if ($event->isRelationship(Post::class, 'comments')) {
-            return $event->model->hasMany(Comment::class);
+            return $event->model->hasMany(Comment::class, 'post_id');
         }
     }
 
@@ -55,7 +55,7 @@ class AddDiscussionPollRelationship
      */
     public function getApiRelationship(GetApiRelationship $event)
     {
-        if ($event->isRelationship(DiscussionSerializer::class, 'comments')) {
+        if ($event->isRelationship(PostSerializer::class, 'comments')) {
             return $event->serializer->hasMany($event->model, CommentSerializer::class, 'comments');
         }
     }
@@ -78,18 +78,14 @@ class AddDiscussionPollRelationship
      */
     public function includeRelationship(WillGetData $event)
     {
-        if ($event->isController(Controller\ShowDiscussionController::class)
-            || $event->isController(Controller\CreateDiscussionController::class)
-            || $event->isController(Controller\UpdateDiscussionController::class)
+        if ($event->isController(Controller\ShowPostController::class)
+            || $event->isController(Controller\CreatePostController::class)
+            || $event->isController(Controller\UpdatePostController::class)
         ) {
             $event->addInclude('comments');
-            $event->addInclude('comments.options');
-            $event->addInclude('comments.votes');
-            $event->addInclude('comments.votes.user');
-            $event->addInclude('comments.votes.option');
         }
 
-        if ($event->isController(Controller\ListDiscussionsController::class)) {
+        if ($event->isController(Controller\ListPostsController::class)) {
             $event->addInclude('comments');
         }
     }
