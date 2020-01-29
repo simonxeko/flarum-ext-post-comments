@@ -10,7 +10,8 @@
  */
 
 namespace Simonxeko\PostComments;
-
+use Illuminate\Events\Dispatcher;
+// use Flarum\Discussion\Event\Saving; ??
 use Flarum\Extend;
 
 return [
@@ -22,11 +23,13 @@ return [
         ->css(__DIR__.'/resources/less/admin.less'),
     new Extend\Locales(__DIR__ . '/resources/locale'),
     (new Extend\Routes('api'))
-        ->patch('/comments/{id}', 'simonxeko.postcomments.edit', Controllers\EditPollController::class)
-        ->delete('/comments/{id}', 'simonxeko.postcomments.delete', Controllers\DeletePollController::class)
-        ->patch('/comments/{id}/vote', 'simonxeko.postcomments.vote', Controllers\VotePollController::class),
+        ->get('/comments','comments.index', Controllers\ListCommentsController::class)
+        ->post('/comments','comments.create', Controllers\CreateCommentController::class)
+        ->get('/comments/{id}','comments.show', Controllers\ShowCommentController::class),
+#        ->patch('/comments/{id}','comments.update', Controllers\UpdateCommentController::class)
+#        ->delete('/comments/{id}', 'comments.delete', Controllers\DeleteCommentController::class),
     new Extend\Compat(function (Dispatcher $events) {
         $events->subscribe(Listeners\AddPostCommentRelationship::class);
-        $events->listen(Saving::class, Listeners\SaveCommentsToDatabase::class);
+        // $events->listen(Saving::class, Listeners\SaveCommentsToDatabase::class);
     }),
 ];
