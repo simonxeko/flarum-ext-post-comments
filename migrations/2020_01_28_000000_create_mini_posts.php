@@ -38,7 +38,6 @@ return [
                 $table->foreign('discussion_id')->references('id')->on('discussions')->onDelete('cascade');
                 $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-                $table->primary('id');
             }
         );
     },
