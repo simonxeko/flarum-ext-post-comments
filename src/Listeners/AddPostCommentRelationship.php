@@ -12,16 +12,23 @@
 namespace Simonxeko\PostComments\Listeners;
 
 use Flarum\Api\Controller;
+use Flarum\Api\Controller\ShowDiscussionController;
+use Flarum\Api\Controller\ShowPostController;
+use Flarum\Api\Controller\ListPostsController;
+use Flarum\Event\GetApiRelationship;
+use Flarum\Event\GetModelRelationship;
+use Flarum\Api\Event\WillSerializeData;
 use Flarum\Api\Event\Serializing;
 use Flarum\Api\Event\WillGetData;
 use Flarum\Api\Serializer\DiscussionSerializer;
 use Flarum\Api\Serializer\UserSerializer;
+use Flarum\Api\Serializer\PostSerializer;
 use Flarum\Post\Post;
-use Flarum\Event\GetApiRelationship;
-use Flarum\Event\GetModelRelationship;
-use Simonxeko\PostComments\Api\Serializers\CommentSerializer;
+use Flarum\Post\CommentPost;
+use Simonxeko\PostComments\Serializers\CommentSerializer;
 use Simonxeko\PostComments\Comment;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Collection;
 
 class AddPostCommentRelationship
 {
@@ -33,6 +40,7 @@ class AddPostCommentRelationship
         $events->listen(GetModelRelationship::class, [$this, 'getModelRelationship']);
         $events->listen(GetApiRelationship::class, [$this, 'getApiRelationship']);
         $events->listen(WillGetData::class, [$this, 'includeRelationship']);
+        $events->listen(WillSerializeData::class, [$this, 'prepareApiData']);
         $events->listen(Serializing::class, [$this, 'prepareApiAttributes']);
     }
 
@@ -78,15 +86,67 @@ class AddPostCommentRelationship
      */
     public function includeRelationship(WillGetData $event)
     {
+        if ($event->isController(Controller\ShowDiscussionController::class)) {
+            $event->addInclude([
+                'posts.comments'
+            ]);
+        }
         if ($event->isController(Controller\ShowPostController::class)
             || $event->isController(Controller\CreatePostController::class)
             || $event->isController(Controller\UpdatePostController::class)
         ) {
             $event->addInclude('comments');
+            $event->addInclude('comments.user');
         }
 
         if ($event->isController(Controller\ListPostsController::class)) {
             $event->addInclude('comments');
+            $event->addInclude('comments.user');
+        }
+    }
+
+
+    /**
+     * @param WillSerializeData $event
+     */
+    public function prepareApiData(WillSerializeData $event)
+    {
+        // For any API action that allows the 'flags' relationship to be
+        // included, we need to preload this relationship onto the data (Post
+        // models) so that we can selectively expose only the flags that the
+        // user has permission to view.
+        if ($event->isController(Controller\ShowDiscussionController::class)) {
+            if ($event->data->relationLoaded('posts')) {
+                $posts = $event->data->getRelation('posts');
+            }
+        }
+
+        if ($event->isController(Controller\ListPostsController::class)) {
+            $posts = $event->data->all();
+        }
+
+        if ($event->isController(Controller\ShowPostController::class)) {
+            $posts = [$event->data];
+        }
+
+        if ($event->isController(CreateCommentController::class)) {
+            $posts = [$event->data->post];
+        }
+
+        if (isset($posts)) {
+            // $actor = $event->request->getAttribute('actor');
+            $postsWithPermission = [];
+
+            foreach ($posts as $post) {
+                if (is_object($post)) {
+                    $post->setRelation('comments', null);
+                    $postsWithPermission[] = $post;
+                }
+            }
+
+            if (count($postsWithPermission)) {
+                (new Collection($postsWithPermission))->load('comments', 'comments.user');
+            }
         }
     }
 }
