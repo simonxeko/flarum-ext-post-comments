@@ -13,7 +13,7 @@ use Simonxeko\PostComments\Comment;
 use Flarum\Api\Serializer\AbstractSerializer;
 use InvalidArgumentException;
 
-class BasicPostSerializer extends AbstractSerializer
+class BasicCommentSerializer extends AbstractSerializer
 {
     /**
      * {@inheritdoc}
