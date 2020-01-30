@@ -1,15 +1,12 @@
 import { extend } from 'flarum/extend';
 import Button from 'flarum/components/Button';
-import Comment from './models/Comment';
 import CommentPost from 'flarum/components/CommentPost';
 import DiscussionControls from 'flarum/utils/DiscussionControls';
 import CommentComposer from './components/CommentComposer';
 import LogInModal from 'flarum/components/LogInModal';
-import Post from 'flarum/components/Post';
-import listItems from 'flarum/helpers/listItems';
 import Model from 'flarum/Model';
-import humanTime from 'flarum/helpers/humanTime';
-import avatar from 'flarum/helpers/avatar';
+import Comment from './models/Comment';
+import CommentsList from './components/CommentsList';
 
 function insertMention(post, component, quote) {
   const user = post.user();
@@ -34,7 +31,7 @@ function insertMention(post, component, quote) {
   );
 }
 
-function reply(post, quote) {
+function reply(post, quote, context) {
   const component = app.composer.component;
   if (component && component.props.post && component.props.post.discussion() === post.discussion()) {
     insertMention(post, component, quote);
@@ -49,7 +46,8 @@ function reply(post, quote) {
             user: app.session.user,
             discussion: post.discussion(),
             post: post,
-            to_user: post.user() 
+            to_user: post.user(),
+            target_frame: context 
           });
           app.composer.load(component);
         }
@@ -94,71 +92,18 @@ app.initializers.add('simonxeko/post-comments', () => {
       Button.component({
         className: 'Button Button--link',
         children: app.translator.trans('Comment'),
-        onclick: () => reply(post)
+        onclick: () => reply(post, null, this)
       })
     );
   });
 
   extend(CommentPost.prototype, 'footerItems', function(items) {
-    console.log("who is me?", this);
     const post = this.props.post;
-    const deleteComment = function(context) {
-      context.loading = true;
-      this.delete().then(() => {
-        post.removeComment(this.id());
-      }).then(() => {
-        context.loading = false;
-        m.redraw();
-      });
-    };
-    // app.current.stream.update().then(() => app.current.stream.goToNumber(post.number()));
-    const commentDisplay = (comment) => {
-      const userId = comment.data.relationships.user.data.id;
-      const user = app.store.data.users[userId];
-      return (<div style="border-bottom: 1px solid #EEE; padding: 15px 0;">
-        <div style="float: left; padding-right: 15px;">
-          {avatar(user, {style: "width: 32px; height: 32px;"})}
-        </div>
-        <div>
-          <strong>{user.data.attributes.displayName}</strong>
-          <span>&nbsp;&nbsp;</span>
-          <em>{humanTime(comment.data.attributes.createdAt)}</em>
-        </div>
-        <div>
-          <div>
-            {comment.data.attributes.content}
-          </div>
-          <Button className={`Button Button--link`} icon="fas fa-comment">
-            Like
-          </Button>
-          <Button className={`Button Button--link`} icon="fas fa-pencil-alt">
-            Edit
-          </Button>
-          <Button className={`Button Button--link`} icon="fas fa-trash" onclick={deleteComment.bind(comment, this)}>
-            Delete
-          </Button>
-          <Button className={`Button Button--link`} icon="fas fa-eye-slash">
-            Hide
-          </Button>
-        </div>
-      </div>);
-    };
     if (post) {
       if (post.data.attributes.contentHtml) {
-        const postLength = post.data.attributes.contentHtml.replace(/<[^>]*>?/gm, '').length;
-        const authorID = parseInt(this.props.post.data.relationships.user.data.id);
-        //const comment = this.props.post.data.relationships.comment;
         const comments = this.props.post.comments();
-        // console.log("comments()", post.comments());
         if (comments.length > 0) {
-          /* items.add('comments', <Button className={`Button`} icon="fas fa-comment">
-            {comments.data.length}
-          </Button>);*/
-          items.add('comments', <div style="clear: both; border: 1px solid #EEE; border-radius:5px; padding: 15px">
-            {comments.map((comment, i) => {
-              return commentDisplay(comment);
-            })}
-          </div>);
+          items.add('comments', <CommentsList context={this} post={this.props.post} comments={this.props.post.comments()} />);
         }
       }
     }
