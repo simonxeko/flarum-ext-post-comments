@@ -79,7 +79,9 @@ export default class CommentComposer extends ComposerBody {
   onsubmit() {
     const discussion = this.props.discussion;
     const post = this.props.post;
+    const target_frame = this.props.target_frame;
 
+    if (target_frame) target_frame.loading = true;
     this.loading = true;
     m.redraw();
 
@@ -90,7 +92,7 @@ export default class CommentComposer extends ComposerBody {
         // If we're currently viewing the discussion which this reply was made
         // in, then we can update the comment stream and scroll to the comment.
         if (app.viewingDiscussion(discussion)) {
-          app.current.stream.update().then(() => app.current.stream.goToNumber(comment.number()));
+          app.current.stream.update().then(() => app.current.stream.goToNumber(comment.number())).then(() => { if(target_frame) {target_frame.loading = false;} m.redraw(); } );
 
         } else {
           // Otherwise, we'll create an alert message to inform the user that
@@ -117,6 +119,7 @@ export default class CommentComposer extends ComposerBody {
               controls: [viewButton]
             })
           );
+          if (target_frame) target_frame.loading = false;
         }
 
         app.composer.hide();
