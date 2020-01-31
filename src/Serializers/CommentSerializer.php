@@ -12,6 +12,7 @@ use Flarum\Api\Serializer\BasicDiscussionSerializer;
 use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Api\Serializer\UserSerializer;
 use Flarum\User\Gate;
+use Simonxeko\PostComments\Comment;
 
 class CommentSerializer extends BasicCommentSerializer
 {
@@ -39,21 +40,17 @@ class CommentSerializer extends BasicCommentSerializer
 
         $gate = $this->gate->forUser($this->actor);
 
-        $canEdit = $gate->allows('edit', $comment);
+        $canEdit = $this->actor->can('edit', $comment);
 
-        if ($comment instanceof CommentPost) {
-            if ($canEdit) {
-                $attributes['content'] = $comment->content;
-            }
+        if ($comment instanceof Comment) {
+            $attributes['content'] = $comment->content;
             /* if ($gate->allows('viewIps', $comment)) {
                 $attributes['ipAddress'] = $comment->ip_address;
             }*/
-        } else {
-            $attributes['content'] = $comment->content;
         }
 
-        if ($comment->edited_at) {
-            $attributes['editedAt'] = $this->formatDate($comment->edited_at);
+        if ($comment->updared_at) {
+            $attributes['editedAt'] = $this->formatDate($comment->updated_at);
         }
 
         if ($comment->created_at) {
@@ -66,9 +63,10 @@ class CommentSerializer extends BasicCommentSerializer
         }
 
         $attributes += [
+            'canLike' => $this->actor->can('like', $comment),
             'canEdit'   => $canEdit,
-            'canDelete' => $gate->allows('delete', $comment),
-            'canHide'   => $gate->allows('hide', $comment)
+            'canDelete' => $this->actor->can('delete', $comment),
+            'canHide'   => $this->actor->can('hide', $comment)
         ];
 
         return $attributes;

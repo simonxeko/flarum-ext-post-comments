@@ -74,10 +74,8 @@ class AddPostCommentRelationship
     public function prepareApiAttributes(Serializing $event)
     {
         if ($event->isSerializer(UserSerializer::class)) {
-            $event->attributes['canEditPolls'] = $event->actor->can('discussion.polls');
-            $event->attributes['canStartPolls'] = $event->actor->can('startPolls');
-            $event->attributes['canSelfEditPolls'] = $event->actor->can('selfEditPolls');
-            $event->attributes['canVotePolls'] = $event->actor->can('votePolls');
+            $event->attributes['canEditComment'] = $event->actor->can('discussion.comment');
+            $event->attributes['canSelfEditComment'] = $event->actor->can('selfEditComment');
         }
     }
 
