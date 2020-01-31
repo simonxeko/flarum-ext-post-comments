@@ -11,6 +11,7 @@
 
 namespace Simonxeko\PostComments;
 use Illuminate\Events\Dispatcher;
+use Simonxeko\PostComments\CommentPolicy;
 // use Flarum\Discussion\Event\Saving; ??
 use Flarum\Extend;
 
@@ -30,6 +31,7 @@ return [
         ->delete('/comments/{id}', 'comments.delete', Controllers\DeleteCommentController::class),
     new Extend\Compat(function (Dispatcher $events) {
         $events->subscribe(Listeners\AddPostCommentRelationship::class);
+        $events->subscribe(CommentPolicy::class);
         // $events->listen(Saving::class, Listeners\SaveCommentsToDatabase::class);
     }),
 ];
