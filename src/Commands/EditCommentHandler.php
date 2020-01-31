@@ -11,7 +11,7 @@ namespace Simonxeko\PostComments\Commands;
 
 use Flarum\Foundation\DispatchEventsTrait;
 use Simonxeko\PostComments\Comment;
-use Simonxeko\PostComments\Event\Saving;
+use Simonxeko\PostComments\Events\Saving;
 use Simonxeko\PostComments\CommentRepository;
 use Simonxeko\PostComments\CommentValidator;
 use Flarum\User\AssertPermissionTrait;
@@ -41,7 +41,7 @@ class EditCommentHandler
     public function __construct(Dispatcher $events, CommentRepository $comments, CommentValidator $validator)
     {
         $this->events = $events;
-        $this->Comments = $comments;
+        $this->comments = $comments;
         $this->validator = $validator;
     }
 
@@ -55,38 +55,36 @@ class EditCommentHandler
         $actor = $command->actor;
         $data = $command->data;
 
-        $Comment = $this->Comments->findOrFail($command->CommentId, $actor);
+        $comment = $this->comments->findOrFail($command->commentId, $actor);
 
-        if ($Comment instanceof CommentComment) {
+        if ($comment instanceof Comment) {
             $attributes = Arr::get($data, 'attributes', []);
-
             if (isset($attributes['content'])) {
-                $this->assertCan($actor, 'edit', $Comment);
+                $this->assertCan($actor, 'edit', $comment);
 
-                $Comment->revise($attributes['content'], $actor);
+                $comment->revise($attributes['content'], $actor);
             }
 
             if (isset($attributes['isHidden'])) {
-                $this->assertCan($actor, 'hide', $Comment);
+                $this->assertCan($actor, 'hide', $comment);
 
                 if ($attributes['isHidden']) {
-                    $Comment->hide($actor);
+                    $comment->hide($actor);
                 } else {
-                    $Comment->restore();
+                    $comment->restore();
                 }
             }
         }
 
         $this->events->dispatch(
-            new Saving($Comment, $actor, $data)
+            new Saving($comment, $actor, $data)
         );
 
-        $this->validator->assertValid($Comment->getDirty());
+        $this->validator->assertValid($comment->getDirty());
+        $comment->save();
 
-        $Comment->save();
+        $this->dispatchEventsFor($comment, $actor);
 
-        $this->dispatchEventsFor($Comment, $actor);
-
-        return $Comment;
+        return $comment;
     }
 }

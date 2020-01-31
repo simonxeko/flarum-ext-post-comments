@@ -53,7 +53,6 @@ class UpdateCommentController extends AbstractShowController
         $id = Arr::get($request->getQueryParams(), 'id');
         $actor = $request->getAttribute('actor');
         $data = Arr::get($request->getParsedBody(), 'data', []);
-
         return $this->bus->dispatch(
             new EditComment($id, $actor, $data)
         );

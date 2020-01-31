@@ -26,18 +26,22 @@ export default class CommentDisplay extends Component {
         </div>
         <div>
             <div>{comment.data.attributes.content}</div>
-            <Button className={`Button Button--link`} icon="fas fa-comment">
+            { comment.data.attributes.canLike ? (
+              <Button className={`Button Button--link`} icon="far fa-thumbs-up">
                 Like
-            </Button>
-            <Button className={`Button Button--link`} icon="fas fa-pencil-alt">
-                Edit
-            </Button>
+              </Button>) : ''}
+            { comment.data.attributes.canEdit ? (
+              <Button className={`Button Button--link`} icon="fas fa-pencil-alt" onclick={this.props.editComment}>
+                  Edit
+            </Button>) : ''}
+            { comment.data.attributes.canDelete ? (
             <Button className={`Button Button--link`} icon="fas fa-trash" onclick={this.props.deleteComment}>
                 Delete
-            </Button>
-            <Button className={`Button Button--link`} icon="fas fa-eye-slash">
+            </Button>) : '' }
+            { comment.data.attributes.canHide ? (
+            <Button className={`Button Button--link`} icon="far fa-eye-slash">
                 Hide
-            </Button>
+            </Button>) : '' }
         </div>
     </div>);
   }

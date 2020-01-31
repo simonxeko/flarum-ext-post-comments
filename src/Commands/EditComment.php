@@ -41,7 +41,7 @@ class EditComment
      */
     public function __construct($commentId, User $actor, array $data)
     {
-        $this->comment = $commentId;
+        $this->commentId = $commentId;
         $this->actor = $actor;
         $this->data = $data;
     }

@@ -14,7 +14,8 @@ namespace Simonxeko\PostComments;
 use Flarum\Database\AbstractModel;
 use Flarum\Database\ScopeVisibilityTrait;
 use Flarum\Discussion\Discussion;
-use Flarum\Event\GetModelIsPrivate;
+# use Flarum\Events\GetModelIsPrivate;
+use Simonxeko\PostComments\Events\Revised;
 use Flarum\Foundation\EventGeneratorTrait;
 use Flarum\Post\Post;
 use Flarum\User\User;
@@ -43,7 +44,8 @@ class Comment extends AbstractModel
     public $timestamps = true;
 
     protected $dates = [
-        'created_at'
+        'created_at',
+        'updated_at'
     ];
 
     /**
@@ -116,5 +118,26 @@ class Comment extends AbstractModel
         $comment->raise(new Posted($comment));
 
         return $comment;
+    }
+
+    /**
+     * Revise the post's content.
+     *
+     * @param string $content
+     * @param User $actor
+     * @return $this
+     */
+    public function revise($content, User $actor)
+    {
+        if ($this->content !== $content) {
+            $this->content = $content;
+
+            $this->updated_at = Carbon::now();
+            # $this->edited_user_id = $actor->id;
+
+            $this->raise(new Revised($this));
+        }
+
+        return $this;
     }
 }
