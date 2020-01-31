@@ -17,22 +17,22 @@ use Illuminate\Database\Schema\Builder;
 
 return [
     'up' => function (Builder $schema) {
-        if ($schema->hasTable('comment-likes')) {
+        if ($schema->hasTable('comment_likes')) {
             return;
         }
 
         $schema->create(
-            'comment-likes',
+            'comment_likes',
             function (Blueprint $table) {
-                $table->integer('mini_post_id')->unsigned();
-                $table->integer('user_id')->unsigned()->nullable();
-                $table->foreign('mini_post_id')->references('id')->on('comment-likes')->onDelete('cascade');
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-                $table->primary(['mini_post_id', 'user_id']);
+                $table->integer('comment_id')->unsigned();
+                $table->integer('user_id')->unsigned();
+                $table->primary(['comment_id', 'user_id']);
+                $table->foreign('comment_id')->references('id')->on('comments')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             }
         );
     },
     'down' => function (Builder $schema) {
-        $schema->dropIfExists('comment-likes');
+        $schema->dropIfExists('comment_likes');
     },
 ];
