@@ -1,0 +1,33 @@
+.comment-item {
+    border-bottom: 1px solid #EEE;
+    padding: 15px 0 10px 0;
+    &:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+}
+
+.comment-avatar {
+    float: left;
+    padding-right: 15px;
+}
+
+.comment-content {
+    padding-left: 32px;
+}
+
+.comments-list {
+    clear: both; 
+    border: 1px solid #EEE; 
+    border-radius:5px; 
+    padding: 15px;
+}
+
+.comment-actions {
+    display:inline-block;
+    opacity: 0;
+    transition: opacity 0.3s;
+    &:hover {
+        opacity: 1;
+    }
+}
