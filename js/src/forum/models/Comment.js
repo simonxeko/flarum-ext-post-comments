@@ -11,6 +11,7 @@ Object.assign(Comment.prototype, {
 
   createdAt: Model.attribute('createdAt', Model.transformDate),
   user: Model.hasOne('user'),
+
   contentType: Model.attribute('contentType'),
   content: Model.attribute('content'),
   contentHtml: Model.attribute('contentHtml'),
@@ -26,5 +27,7 @@ Object.assign(Comment.prototype, {
 
   canEdit: Model.attribute('canEdit'),
   canHide: Model.attribute('canHide'),
-  canDelete: Model.attribute('canDelete')
+  canDelete: Model.attribute('canDelete'),
+
+  likes: Model.hasMany('likes')
 });

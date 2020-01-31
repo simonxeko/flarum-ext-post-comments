@@ -43,6 +43,7 @@ export default class CommentComposer extends ComposerBody {
     const items = super.headerItems();
     const discussion = this.props.discussion;
     const post = this.props.post;
+    const comment = this.props.comment;
     const to_user = this.props.to_user;
 
     const routeAndMinimize = function(element, isInitialized) {
@@ -54,7 +55,7 @@ export default class CommentComposer extends ComposerBody {
     items.add('title', (
       <h3>
         {icon('fas fa-reply')} {' '}
-        <a href={app.route.post(post)} config={routeAndMinimize}>@{to_user.displayName()}#{post.id()}</a>
+        <a href={app.route.post(post)} config={routeAndMinimize}>@{to_user.displayName()} #{comment ? comment.id() : post.id()}</a>
       </h3>
     ));
 
