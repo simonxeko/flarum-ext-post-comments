@@ -8,6 +8,14 @@ import Model from 'flarum/Model';
 import Comment from './models/Comment';
 import CommentsList from './components/CommentsList';
 
+/**
+ * TODO:
+ *  - Permission
+ *  - Hide
+ *  - Notification
+ *  - Layout adjustment
+ * **/ 
+
 function insertMention(post, component, quote) {
   const user = post.user();
   const mention = '@' + (user ? user.username() : post.number()) + '#' + post.id() + ' ';
@@ -91,7 +99,7 @@ app.initializers.add('simonxeko/post-comments', () => {
     items.replace('reply',
       Button.component({
         className: 'Button Button--link',
-        children: app.translator.trans('Comment'),
+        children: app.translator.trans('flarum-mentions.forum.post.reply_link'),
         onclick: () => reply(post, null, this)
       })
     );
@@ -103,7 +111,7 @@ app.initializers.add('simonxeko/post-comments', () => {
       if (post.data.attributes.contentHtml) {
         const comments = this.props.post.comments();
         if (comments.length > 0) {
-          items.add('comments', <CommentsList context={this} post={this.props.post} comments={this.props.post.comments()} />);
+          items.add('comments', <CommentsList context={this} discussion={this.props.post.discussion()} post={this.props.post} comments={this.props.post.comments()} />);
         }
       }
     }
