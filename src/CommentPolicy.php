@@ -137,9 +137,20 @@ class CommentPolicy extends AbstractPolicy
      * @param Comment $post
      * @return bool|null
      */
-    public function like(User $actor, Comment $post)
+    public function delete(User $actor, Comment $comment)
     {
-        return !($actor instanceof Guest);
+        // A post is allowed to be edited if the user is the author, the post
+        // hasn't been deleted by someone else, and the user is allowed to
+        // create new replies in the discussion.
+        if ($comment->user_id == $actor->id && (! $comment->hidden_at || $comment->hidden_user_id == $actor->id)) {
+            // $allowEditing = $this->settings->get('allow_post_editing');
+            $comment_is_last =  $comment->number >= $comment->discussion->last_post_number;
+            return true;
+            if ($allowEditing === '-1') {
+                // || ($post->created_at->diffInMinutes(new Carbon) < $allowEditing)) {
+                return true;
+            }
+        }
     }
 
     /**
@@ -147,8 +158,8 @@ class CommentPolicy extends AbstractPolicy
      * @param Comment $post
      * @return bool|null
      */
-    public function hide(User $actor, Comment $post)
+    public function like(User $actor, Comment $post)
     {
-        return $this->edit($actor, $post);
+        return !($actor instanceof Guest);
     }
 }
