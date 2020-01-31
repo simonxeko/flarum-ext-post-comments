@@ -20,9 +20,11 @@ use Flarum\Event\GetModelRelationship;
 use Flarum\Api\Event\WillSerializeData;
 use Flarum\Api\Event\Serializing;
 use Flarum\Api\Event\WillGetData;
+use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Api\Serializer\DiscussionSerializer;
 use Flarum\Api\Serializer\UserSerializer;
 use Flarum\Api\Serializer\PostSerializer;
+use Flarum\User\User;
 use Flarum\Post\Post;
 use Flarum\Post\CommentPost;
 use Simonxeko\PostComments\Serializers\CommentSerializer;
@@ -54,6 +56,10 @@ class AddPostCommentRelationship
         if ($event->isRelationship(Post::class, 'comments')) {
             return $event->model->hasMany(Comment::class, 'post_id');
         }
+
+        if ($event->isRelationship(Comment::class, 'likes')) {
+            return $event->model->belongsToMany(User::class, 'comment_likes', 'comment_id', 'user_id', null, null, 'likes');
+        }
     }
 
     /**
@@ -65,6 +71,10 @@ class AddPostCommentRelationship
     {
         if ($event->isRelationship(PostSerializer::class, 'comments')) {
             return $event->serializer->hasMany($event->model, CommentSerializer::class, 'comments');
+        }
+
+        if ($event->isRelationship(CommentSerializer::class, 'likes')) {
+            return $event->serializer->hasMany($event->model, BasicUserSerializer::class, 'likes');
         }
     }
 
@@ -87,7 +97,8 @@ class AddPostCommentRelationship
         if ($event->isController(Controller\ShowDiscussionController::class)) {
             $event->addInclude([
                 'posts.comments',
-                'posts.comments.user'
+                'posts.comments.user',
+                'posts.comments.likes'
             ]);
         }
         if ($event->isController(Controller\ShowPostController::class)
@@ -96,11 +107,13 @@ class AddPostCommentRelationship
         ) {
             $event->addInclude('comments');
             $event->addInclude('comments.user');
+            $event->addInclude('comments.likes');
         }
 
         if ($event->isController(Controller\ListPostsController::class)) {
             $event->addInclude('comments');
             $event->addInclude('comments.user');
+            $event->addInclude('comments.likes');
         }
     }
 
@@ -144,7 +157,7 @@ class AddPostCommentRelationship
             }
 
             if (count($postsWithPermission)) {
-                (new Collection($postsWithPermission))->load('comments', 'comments.user');
+                (new Collection($postsWithPermission))->load('comments', 'comments.user' ,'comments.likes');
             }
         }
     }
