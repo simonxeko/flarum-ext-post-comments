@@ -49,7 +49,7 @@ class DeleteCommentFlagsHandler
     {
         $actor = $command->actor;
 
-        $comment = $this->comments->findOrFail($command->postId, $actor);
+        $comment = $this->comments->findOrFail($command->commentId, $actor);
 
         $this->assertCan($actor, 'viewFlags', $comment->discussion);
 

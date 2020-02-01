@@ -16,7 +16,7 @@ use Simonxeko\PostComments\Commands\DeleteCommentFlags;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Psr\Http\Message\ServerRequestInterface;
 
-class DeleteFlagsController extends AbstractDeleteController
+class DeleteCommentFlagsController extends AbstractDeleteController
 {
     /**
      * @var Dispatcher
