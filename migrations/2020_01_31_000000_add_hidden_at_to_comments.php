@@ -17,9 +17,10 @@ use Illuminate\Database\Schema\Builder;
 
 return [
     'up' => function (Builder $schema) {
-        if (!$schema->hasColumn('comments', 'is_hidden')) {
+        if (!$schema->hasColumn('comments', 'hidden_at')) {
             $schema->table('comments', function (Blueprint $table) {
-                $table->boolean('is_hidden');
+                $table->date('hidden_at');
+                $table->integer('user_id')->unsigned()->nullable();
             });
         }
         $schema->table('comment_likes', function (Blueprint $table) {
