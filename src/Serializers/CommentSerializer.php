@@ -49,7 +49,7 @@ class CommentSerializer extends BasicCommentSerializer
             }*/
         }
 
-        if ($comment->updared_at) {
+        if ($comment->updated_at) {
             $attributes['editedAt'] = $this->formatDate($comment->updated_at);
         }
 
