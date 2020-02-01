@@ -42,7 +42,6 @@ class AddPostCommentRelationship
         $events->listen(GetModelRelationship::class, [$this, 'getModelRelationship']);
         $events->listen(GetApiRelationship::class, [$this, 'getApiRelationship']);
         $events->listen(WillGetData::class, [$this, 'includeRelationship']);
-        $events->listen(WillSerializeData::class, [$this, 'prepareApiData']);
         $events->listen(Serializing::class, [$this, 'prepareApiAttributes']);
     }
 
@@ -114,51 +113,6 @@ class AddPostCommentRelationship
             $event->addInclude('comments');
             $event->addInclude('comments.user');
             $event->addInclude('comments.likes');
-        }
-    }
-
-
-    /**
-     * @param WillSerializeData $event
-     */
-    public function prepareApiData(WillSerializeData $event)
-    {
-        // For any API action that allows the 'flags' relationship to be
-        // included, we need to preload this relationship onto the data (Post
-        // models) so that we can selectively expose only the flags that the
-        // user has permission to view.
-        if ($event->isController(Controller\ShowDiscussionController::class)) {
-            if ($event->data->relationLoaded('posts')) {
-                $posts = $event->data->getRelation('posts');
-            }
-        }
-
-        if ($event->isController(Controller\ListPostsController::class)) {
-            $posts = $event->data->all();
-        }
-
-        if ($event->isController(Controller\ShowPostController::class)) {
-            $posts = [$event->data];
-        }
-
-        if ($event->isController(CreateCommentController::class)) {
-            $posts = [$event->data->post];
-        }
-
-        if (isset($posts)) {
-            // $actor = $event->request->getAttribute('actor');
-            $postsWithPermission = [];
-
-            foreach ($posts as $post) {
-                if (is_object($post)) {
-                    $post->setRelation('comments', null);
-                    $postsWithPermission[] = $post;
-                }
-            }
-
-            if (count($postsWithPermission)) {
-                (new Collection($postsWithPermission))->load('comments', 'comments.user' ,'comments.likes', 'comments.comment_flags');
-            }
         }
     }
 }
