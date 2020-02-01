@@ -1,5 +1,5 @@
 import Component from 'flarum/Component';
-import CommentDisplay from './CommentDisplay';
+import Comment from './Comment';
 import EditCommentComposer from './EditCommentComposer';
 import CommentComposer from './CommentComposer';
 import FlagPostModal from './FlagPostModal';
@@ -140,7 +140,7 @@ export default class CommentsList extends Component {
     return <div class="comments-list">
       {
         this.props.comments.map((comment, i) => {
-          return <CommentDisplay
+          return <Comment
             discussion={this.props.discussion}
             post={this.props.post}
             comment={comment}

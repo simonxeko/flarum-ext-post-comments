@@ -3,13 +3,22 @@ import Button from 'flarum/components/Button';
 import humanTime from 'flarum/helpers/humanTime';
 import avatar from 'flarum/helpers/avatar';
 
-export default class CommentDisplay extends Component {
+export default class Comment extends Component {
   init() {
     super.init();
   }
 
   static initProps(props) {
     super.initProps(props);
+  }
+
+  renderCommentFlag(comment_flag) {
+    return (<span>
+      因 {comment_flag.reason() || comment_flag.reasonDetail()} 被 {comment_flag.user().displayName()} 標記
+      <Button className={`Button Button--link`} icon="fas fa-eye-slash" onclick={this.dismissFlag.bind(this)}>
+          {app.translator.trans('flarum-flags.forum.post.dismiss_flag_button')}
+      </Button>
+    </span>);
   }
 
   view() {
@@ -29,7 +38,7 @@ export default class CommentDisplay extends Component {
             <span>&nbsp;&nbsp;</span>
             <em>{humanTime(comment.data.attributes.createdAt)}</em>
             <span>&nbsp;&nbsp;</span>
-            <strong style="color: #660000">{ comment_flags.length > 0 ? `因 ${comment_flags[0].reason() || comment_flags[0].reasonDetail()} 被 ${comment_flags[0].user().displayName()} 標記` : ''}</strong>
+            <strong style="color: #660000">{ comment_flags.length > 0 ? this.renderCommentFlag(comment_flags[0]) : ''}</strong>
             <div>{comment.data.attributes.content}</div>
             { comment.data.attributes.canLike ? (
               <Button className={`Button Button--link`} icon={isLiked ? "fas fa-thumbs-up" : "far fa-thumbs-up"} onclick={this.props.likeComment}>
