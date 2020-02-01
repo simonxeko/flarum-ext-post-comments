@@ -6,6 +6,7 @@ import CommentComposer from './components/CommentComposer';
 import LogInModal from 'flarum/components/LogInModal';
 import Model from 'flarum/Model';
 import Comment from './models/Comment';
+import CommentFlag from './models/CommentFlag';
 import CommentsList from './components/CommentsList';
 
 /**
@@ -89,6 +90,7 @@ app.initializers.add('simonxeko/post-comments', () => {
   };
 
   app.store.models.comments = Comment;
+  app.store.models.comment_flags = CommentFlag;
 
   extend(CommentPost.prototype, 'actionItems', function (items) {
 

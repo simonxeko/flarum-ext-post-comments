@@ -29,5 +29,6 @@ Object.assign(Comment.prototype, {
   canHide: Model.attribute('canHide'),
   canDelete: Model.attribute('canDelete'),
 
-  likes: Model.hasMany('likes')
+  likes: Model.hasMany('likes'),
+  comment_flags: Model.hasMany('comment_flags')
 });

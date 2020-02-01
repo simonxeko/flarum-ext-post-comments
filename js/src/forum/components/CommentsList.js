@@ -2,6 +2,7 @@ import Component from 'flarum/Component';
 import CommentDisplay from './CommentDisplay';
 import EditCommentComposer from './EditCommentComposer';
 import CommentComposer from './CommentComposer';
+import FlagPostModal from './FlagPostModal';
 
 export default class CommentsList extends Component {
   init() {
@@ -131,6 +132,10 @@ export default class CommentsList extends Component {
     });
   };
 
+  flagComment(context) {
+    app.modal.show(new FlagPostModal({comment: this}))
+  };
+
   view() {
     return <div class="comments-list">
       {
@@ -139,6 +144,7 @@ export default class CommentsList extends Component {
             discussion={this.props.discussion}
             post={this.props.post}
             comment={comment}
+            flagComment={this.flagComment.bind(comment,this)}
             replyComment={this.replyComment.bind(comment, this)}
             likeComment={this.likeComment.bind(comment, this)}
             editComment={this.editComment.bind(comment, this)}
