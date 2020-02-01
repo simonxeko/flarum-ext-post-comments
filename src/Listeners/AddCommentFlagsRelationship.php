@@ -36,6 +36,7 @@ class AddCommentFlagsRelationship
         $events->listen(Deleted::class, [$this, 'commentWasDeleted']);
         $events->listen(GetApiRelationship::class, [$this, 'getApiRelationship']);
         $events->listen(WillGetData::class, [$this, 'includeFlagsRelationship']);
+        $events->listen(WillSerializeData::class, [$this, 'prepareApiData']);
     }
 
     /**
@@ -86,6 +87,70 @@ class AddCommentFlagsRelationship
                 'comments.comment_flags',
                 'comments.comment_flags.user'
             ]);
+        }
+    }
+
+
+
+
+    /**
+     * @param WillSerializeData $event
+     */
+    public function prepareApiData(WillSerializeData $event)
+    {
+        // For any API action that allows the 'flags' relationship to be
+        // included, we need to preload this relationship onto the data (Post
+        // models) so that we can selectively expose only the flags that the
+        // user has permission to view.
+        if ($event->isController(Controller\ShowDiscussionController::class)) {
+            if ($event->data->relationLoaded('posts')) {
+                $posts = $event->data->getRelation('posts');
+            }
+        }
+
+        if ($event->isController(Controller\ListPostsController::class)) {
+            $posts = $event->data->all();
+        }
+
+        if ($event->isController(Controller\ShowPostController::class)) {
+            $posts = [$event->data];
+        }
+
+        if ($event->isController(CreateCommentController::class)) {
+            $posts = [$event->data->post];
+        }
+
+        if (isset($posts)) {
+            $actor = $event->request->getAttribute('actor');
+
+            $postsWithViewPermission = [];
+            $postsWithFlagPermission = [];
+
+            foreach ($posts as $post) {
+                $comments = $post->comments;
+                // die(json_encode($comments));
+                foreach ($comments as $comment) {
+                    $comment->setRelation('comment_flags', null);
+                }
+                if (is_object($post)) {
+                    //$post->setRelation('comments', null);
+
+                    //$postsWithViewPermission[] = $post;
+                    if ($actor->can('viewFlags', $post->discussion)) {
+                        // die('can view');
+                        $postsWithFlagPermission[] = $post;
+                    }
+                }
+            }
+
+            /*if (count($postsWithViewPermission)) {
+                (new Collection($postsWithViewPermission))->load('comments', 'comments.user' ,'comments.likes');
+            }*/
+
+            # die('Answer: '.json_encode($postsWithFlagPermission));
+            if (count($postsWithFlagPermission)) {
+                (new Collection($postsWithFlagPermission))->load('comments', 'comments.comment_flags');
+            }
         }
     }
 }
