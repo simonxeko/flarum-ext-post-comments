@@ -40,7 +40,7 @@ return [
     (new Extend\Routes('api'))
         ->get('/comment_flags', 'comment_flags.index', ListCommentFlagsController::class)
         ->post('/comment_flags', 'comment_flags.create', CreateCommentFlagController::class)
-        ->delete('/posts/{id}/comment_flags', 'comment_flags.delete', DeleteCommentFlagsController::class),
+        ->delete('/comments/{id}/comment_flags', 'comment_flags.delete', DeleteCommentFlagsController::class),
     new Extend\Compat(function (Dispatcher $events) {
         $events->subscribe(Listeners\AddPostCommentRelationship::class);
         $events->subscribe(Listeners\SaveCommentLikesToDatabase::class);
