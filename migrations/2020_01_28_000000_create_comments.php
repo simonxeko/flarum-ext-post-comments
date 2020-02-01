@@ -31,7 +31,7 @@ return [
                 $table->integer('number')->unsigned()->nullable();
                 $table->integer('user_id')->unsigned()->nullable();
                 $table->string('content');
-                $table->timestamp('created_at');
+                $table->dateTime('created_at');
 
                 $table->boolean('is_hidden');
 

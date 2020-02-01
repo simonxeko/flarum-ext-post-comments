@@ -19,7 +19,7 @@ return [
     'up' => function (Builder $schema) {
         if (!$schema->hasColumn('comments', 'hidden_at')) {
             $schema->table('comments', function (Blueprint $table) {
-                $table->date('hidden_at');
+                $table->dateTime('hidden_at');
             });
         }
     },

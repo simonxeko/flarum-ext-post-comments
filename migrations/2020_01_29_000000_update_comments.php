@@ -19,7 +19,7 @@ return [
     'up' => function (Builder $schema) {
         if (!$schema->hasColumn('comments', 'updated_at')) {
             $schema->table('comments', function (Blueprint $table) {
-                $table->timestamp('updated_at')->after('created_at');
+                $table->dateTime('updated_at')->after('created_at');
             });
         }
     },
