@@ -20,12 +20,8 @@ return [
         if (!$schema->hasColumn('comments', 'hidden_at')) {
             $schema->table('comments', function (Blueprint $table) {
                 $table->date('hidden_at');
-                $table->integer('user_id')->unsigned()->nullable();
             });
         }
-        $schema->table('comment_likes', function (Blueprint $table) {
-            $table->primary(['comment_id', 'user_id']);
-        });
     },
     'down' => function (Builder $schema) {
     },
