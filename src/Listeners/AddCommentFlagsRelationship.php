@@ -36,7 +36,6 @@ class AddCommentFlagsRelationship
         $events->listen(Deleted::class, [$this, 'commentWasDeleted']);
         $events->listen(GetApiRelationship::class, [$this, 'getApiRelationship']);
         $events->listen(WillGetData::class, [$this, 'includeFlagsRelationship']);
-        $events->listen(WillSerializeData::class, [$this, 'prepareApiData']);
     }
 
     /**
@@ -45,8 +44,8 @@ class AddCommentFlagsRelationship
      */
     public function getModelRelationship(GetModelRelationship $event)
     {
-        if ($event->isRelationship(Comment::class, 'flags')) {
-            return $event->model->hasMany(Flag::class, 'post_id');
+        if ($event->isRelationship(Comment::class, 'comment_flags')) {
+            return $event->model->hasMany(CommentFlag::class, 'comment_id');
         }
     }
 
@@ -55,7 +54,7 @@ class AddCommentFlagsRelationship
      */
     public function commentWasDeleted(Deleted $event)
     {
-        $event->comment->flags()->delete();
+        $event->comment->comment_flags()->delete();
     }
 
     /**
@@ -64,8 +63,8 @@ class AddCommentFlagsRelationship
      */
     public function getApiRelationship(GetApiRelationship $event)
     {
-        if ($event->isRelationship(CommentSerializer::class, 'flags')) {
-            return $event->serializer->hasMany($event->model, FlagSerializer::class, 'flags');
+        if ($event->isRelationship(CommentSerializer::class, 'comment_flags')) {
+            return $event->serializer->hasMany($event->model, CommentFlagSerializer::class, 'comment_flags');
         }
     }
 
@@ -76,65 +75,17 @@ class AddCommentFlagsRelationship
     {
         if ($event->isController(Controller\ShowDiscussionController::class)) {
             $event->addInclude([
-                'posts.comments.flags',
-                'posts.comments.flags.user'
+                'posts.comments.comment_flags',
+                'posts.comments.comment_flags.user'
             ]);
         }
 
         if ($event->isController(Controller\ListPostsController::class)
             || $event->isController(Controller\ShowPostController::class)) {
             $event->addInclude([
-                'comments.flags',
-                'comments.flags.user'
+                'comments.comment_flags',
+                'comments.comment_flags.user'
             ]);
-        }
-    }
-
-    /**
-     * @param WillSerializeData $event
-     */
-    public function prepareApiData(WillSerializeData $event)
-    {
-        // For any API action that allows the 'flags' relationship to be
-        // included, we need to preload this relationship onto the data (Comment
-        // models) so that we can selectively expose only the flags that the
-        // user has permission to view.
-        if ($event->isController(Controller\ShowDiscussionController::class)) {
-            if ($event->data->relationLoaded('comments')) {
-                $comments = $event->data->getRelation('comments');
-            }
-        }
-
-        if ($event->isController(Controller\ListPostsController::class)) {
-            $comments = $event->data->all();
-        }
-
-        if ($event->isController(Controller\ShowPostController::class)) {
-            $comments = [$event->data];
-        }
-
-        if ($event->isController(CreateFlagController::class)) {
-            $comments = [$event->data->post];
-        }
-
-        if (isset($comments)) {
-            $actor = $event->request->getAttribute('actor');
-            $commentsWithPerission = [];
-
-            foreach ($comments as $comment) {
-                if (is_object($comment)) {
-                    $comment->setRelation('flags', null);
-
-                    if ($actor->can('viewFlags', $comment->post->discussion)) {
-                        $commentsWithPerission[] = $comment;
-                    }
-                }
-            }
-
-            if (count($commentsWithPerission)) {
-                (new Collection($commentsWithPerission))
-                    ->load('flags', 'flags.user');
-            }
         }
     }
 }

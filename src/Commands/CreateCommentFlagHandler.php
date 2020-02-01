@@ -17,7 +17,7 @@ use Simonxeko\PostComments\CommentRepository;
 use Flarum\User\AssertPermissionTrait;
 use Tobscure\JsonApi\Exception\InvalidParameterException;
 
-class CreateFlagHandler
+class CreateCommentFlagHandler
 {
     use AssertPermissionTrait;
 
@@ -39,13 +39,13 @@ class CreateFlagHandler
      * @return Flag
      * @throws InvalidParameterException
      */
-    public function handle(CreateFlag $command)
+    public function handle(CreateCommentFlag $command)
     {
         $actor = $command->actor;
         $data = $command->data;
 
-        $postId = array_get($data, 'relationships.post.data.id');
-        $comment = $this->comments->findOrFail($postId, $actor);
+        $commentId = array_get($data, 'relationships.comment.data.id');
+        $comment = $this->comments->findOrFail($commentId, $actor);
 
         if (! ($comment instanceof Comment)) {
             throw new InvalidParameterException;
@@ -53,9 +53,9 @@ class CreateFlagHandler
 
         $this->assertCan($actor, 'flag', $comment);
 
-        Flag::unguard();
+        CommentFlag::unguard();
 
-        $flag = Flag::firstOrNew([
+        $flag = CommentFlag::firstOrNew([
             'comment_id' => $comment->id,
             'user_id' => $actor->id
         ]);

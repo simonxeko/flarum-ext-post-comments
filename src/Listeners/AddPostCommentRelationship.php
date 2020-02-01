@@ -157,7 +157,7 @@ class AddPostCommentRelationship
             }
 
             if (count($postsWithPermission)) {
-                (new Collection($postsWithPermission))->load('comments', 'comments.user' ,'comments.likes');
+                (new Collection($postsWithPermission))->load('comments', 'comments.user' ,'comments.likes', 'comments.comment_flags');
             }
         }
     }

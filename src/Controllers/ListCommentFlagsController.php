@@ -25,7 +25,7 @@ class ListFlagsController extends AbstractListController
     /**
      * {@inheritdoc}
      */
-    public $serializer = FlagSerializer::class;
+    public $serializer = CommentFlagSerializer::class;
 
     /**
      * {@inheritdoc}
@@ -49,9 +49,9 @@ class ListFlagsController extends AbstractListController
         $actor->read_flags_at = time();
         $actor->save();
 
-        return Flag::whereVisibleTo($actor)
+        return CommentFlag::whereVisibleTo($actor)
             ->with($this->extractInclude($request))
-            ->latest('flags.created_at')
+            ->latest('comment_flags.created_at')
             ->groupBy('comment_id')
             ->get();
     }

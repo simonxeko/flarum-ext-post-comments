@@ -61,7 +61,7 @@ class AddFlagsApiAttributes
      */
     protected function getFlagCount(User $actor)
     {
-        return Flag::whereVisibleTo($actor)->distinct()->count('flags.post_id');
+        return CommentFlag::whereVisibleTo($actor)->distinct()->count('comment_flags.comment_id');
     }
 
     /**
@@ -70,12 +70,12 @@ class AddFlagsApiAttributes
      */
     protected function getNewFlagCount(User $actor)
     {
-        $query = Flag::whereVisibleTo($actor);
+        $query = CommentFlag::whereVisibleTo($actor);
 
         if ($time = $actor->read_flags_at) {
-            $query->where('flags.created_at', '>', $time);
+            $query->where('comment_flags.created_at', '>', $time);
         }
 
-        return $query->distinct()->count('flags.post_id');
+        return $query->distinct()->count('comment_flags.comment_id');
     }
 }

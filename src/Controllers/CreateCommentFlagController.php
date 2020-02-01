@@ -23,14 +23,14 @@ class CreateCommentFlagController extends AbstractCreateController
     /**
      * {@inheritdoc}
      */
-    public $serializer = FlagSerializer::class;
+    public $serializer = CommentFlagSerializer::class;
 
     /**
      * {@inheritdoc}
      */
     public $include = [
         'comment',
-        'comment.flags'
+        'comment.comment_flags'
     ];
 
     /**

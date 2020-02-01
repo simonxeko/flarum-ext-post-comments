@@ -162,4 +162,15 @@ class CommentPolicy extends AbstractPolicy
     {
         return !($actor instanceof Guest);
     }
+
+
+    /**
+     * @param User $actor
+     * @param Comment $post
+     * @return bool|null
+     */
+    public function flag(User $actor, Comment $post)
+    {
+        return !($actor instanceof Guest);
+    }
 }

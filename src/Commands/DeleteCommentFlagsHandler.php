@@ -43,9 +43,9 @@ class DeleteCommentFlagsHandler
 
     /**
      * @param DeleteFlags $command
-     * @return Flag
+     * @return CommentFlag
      */
-    public function handle(DeleteFlags $command)
+    public function handle(DeleteCommentFlags $command)
     {
         $actor = $command->actor;
 
@@ -53,9 +53,9 @@ class DeleteCommentFlagsHandler
 
         $this->assertCan($actor, 'viewFlags', $comment->discussion);
 
-        $this->events->dispatch(new FlagsWillBeDeleted($comment, $actor, $command->data));
+        $this->events->dispatch(new CommentFlagsWillBeDeleted($comment, $actor, $command->data));
 
-        $comment->flags()->delete();
+        $comment->comment_flags()->delete();
 
         return $comment;
     }

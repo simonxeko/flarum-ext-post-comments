@@ -13,7 +13,7 @@ namespace Simonxeko\PostComments;
 
 use Flarum\Database\AbstractModel;
 use Flarum\Database\ScopeVisibilityTrait;
-use Simonxeko\PostComment\Comment;
+use Simonxeko\PostComments\Comment;
 use Flarum\User\User;
 
 class CommentFlag extends AbstractModel

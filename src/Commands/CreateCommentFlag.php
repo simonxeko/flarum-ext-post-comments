@@ -13,7 +13,7 @@ namespace Simonxeko\PostComments\Commands;
 
 use Flarum\User\User;
 
-class CreateFlag
+class CreateCommentFlag
 {
     /**
      * The user performing the action.
