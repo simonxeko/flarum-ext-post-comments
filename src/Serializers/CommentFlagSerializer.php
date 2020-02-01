@@ -20,7 +20,7 @@ class CommentFlagSerializer extends AbstractSerializer
     /**
      * {@inheritdoc}
      */
-    protected $type = 'flags';
+    protected $type = 'comment_flags';
 
     /**
      * {@inheritdoc}
