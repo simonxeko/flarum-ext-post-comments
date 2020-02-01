@@ -1,38 +1,39 @@
 import { extend } from 'flarum/extend';
 import app from 'flarum/app';
-import Post from 'flarum/components/Post';
+import Comment from './components/Comment';
 import Button from 'flarum/components/Button';
 import ItemList from 'flarum/utils/ItemList';
 import PostControls from 'flarum/utils/PostControls';
 
+
 export default function() {
-  extend(Post.prototype, 'attrs', function(attrs) {
+  extend(Comment.prototype, 'attrs', function(attrs) {
     if (this.props.post.comment_flags().length) {
-      attrs.className += ' Post--flagged';
+      attrs.className += ' Comment--flagged';
     }
   });
 
-  Post.prototype.dismissFlag = function(data) {
-    const post = this.props.post;
+  Comment.prototype.dismissFlag = function(data) {
+    const comment = this.props.comment;
 
-    delete post.data.relationships.comment_flags;
+    delete comment.data.relationships.comment_flags;
 
-    this.subtree.invalidate();
+    this.props.post.freshness = new Date();
 
     if (app.cache.comment_flags) {
       app.cache.comment_flags.some((flag, i) => {
-        if (flag.post() === post) {
+        if (flag.comment() === comment) {
           app.cache.comment_flags.splice(i, 1);
 
-          if (app.cache.flagIndex === post) {
+          if (app.cache.flagIndex === comment) {
             let next = app.cache.comment_flags[i];
 
             if (!next) next = app.cache.comment_flags[0];
 
             if (next) {
-              const nextPost = next.post();
+              const nextPost = next.comment();
               app.cache.flagIndex = nextPost;
-              m.route(app.route.post(nextPost));
+              m.route(app.route.comment(nextPost));
             }
           }
 
@@ -41,14 +42,16 @@ export default function() {
       });
     }
 
+    m.redraw();
+
     return app.request({
-      url: app.forum.attribute('apiUrl') + post.apiEndpoint() + '/comment_flags',
+      url: app.forum.attribute('apiUrl') + comment.apiEndpoint() + '/comment_flags',
       method: 'DELETE',
       data
     });
   };
 
-  Post.prototype.flagActionItems = function() {
+  Comment.prototype.flagActionItems = function() {
     const items = new ItemList();
 
     const controls = PostControls.destructiveControls(this.props.post);
@@ -76,7 +79,7 @@ export default function() {
     return items;
   };
 
-  extend(Post.prototype, 'content', function(vdom) {
+  extend(Comment.prototype, 'content', function(vdom) {
     const post = this.props.post;
     const flags = post.flags();
 
@@ -85,22 +88,22 @@ export default function() {
     if (post.isHidden()) this.revealContent = true;
 
     vdom.unshift(
-      <div className="Post-flagged">
-        <div className="Post-flagged-flags">
+      <div className="Comment-flagged">
+        <div className="Comment-flagged-flags">
           {flags.map(flag =>
-            <div className="Post-flagged-flag">
+            <div className="Comment-flagged-flag">
               {this.flagReason(flag)}
             </div>
           )}
         </div>
-        <div className="Post-flagged-actions">
+        <div className="Comment-flagged-actions">
           {this.flagActionItems().toArray()}
         </div>
       </div>
     );
   });
 
-  Post.prototype.flagReason = function(flag) {
+  Comment.prototype.flagReason = function(flag) {
     if (flag.type() === 'user') {
       const user = flag.user();
       const reason = flag.reason();
@@ -108,7 +111,7 @@ export default function() {
 
       return [
         app.translator.trans(reason ? 'flarum-flags.forum.post.flagged_by_with_reason_text' : 'flarum-flags.forum.post.flagged_by_text', {user, reason}),
-        detail ? <span className="Post-flagged-detail">{detail}</span> : ''
+        detail ? <span className="Comment-flagged-detail">{detail}</span> : ''
       ];
     }
   };

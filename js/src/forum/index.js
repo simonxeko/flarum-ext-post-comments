@@ -8,6 +8,7 @@ import Model from 'flarum/Model';
 import Comment from './models/Comment';
 import CommentFlag from './models/CommentFlag';
 import CommentsList from './components/CommentsList';
+import addFlagsToComment from './addFlagsToComment';
 
 /**
  * TODO:
@@ -118,5 +119,7 @@ app.initializers.add('simonxeko/post-comments', () => {
       }
     }
   });
+
+  addFlagsToComment();
 
 });
