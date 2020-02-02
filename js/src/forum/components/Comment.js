@@ -29,7 +29,7 @@ export default class Comment extends Component {
       const comment_flags = comment.comment_flags();
       console.log("Flags", comment, likes, comment_flags);
       return (<div className="comment-item">
-        <div>
+        <div style={comment.isHidden() ? 'opacity: 0.5' : ''}>
           <div className="comment-avatar">
               {avatar(user, {style: "width: 32px; height: 32px;"})}
           </div>
@@ -61,10 +61,13 @@ export default class Comment extends Component {
               <Button className={`Button Button--link`} icon="fas fa-flag" onclick={this.props.flagComment}>
                   {app.translator.trans('flarum-flags.forum.post_controls.flag_button')}
               </Button>) : '' }
-              { comment.data.attributes.canHide ? (
-              <Button className={`Button Button--link`} icon="far fa-eye-slash" onclick={this.props.hideComment}>
+              { comment.data.attributes.canHide ? (comment.isHidden() ? 
+                (<Button className={`Button Button--link`} icon="far fa-eye" onclick={this.props.restoreComment}>
+                {app.translator.trans('core.forum.post_controls.restore_button')}
+                </Button>):
+                (<Button className={`Button Button--link`} icon="far fa-eye-slash" onclick={this.props.hideComment}>
                   {app.translator.trans('core.lib.badge.hidden_tooltip')}
-              </Button>) : '' }
+                </Button>) ): '' }
             </div>
           </div>
         </div>

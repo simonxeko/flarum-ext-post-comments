@@ -132,6 +132,25 @@ export default class CommentsList extends Component {
     });
   };
 
+  hideComment(context) {
+    const hidden_date = new Date();
+    this.pushAttributes({hidden_at: hidden_date});
+    this.save({ isHidden: true });
+    this.data.attributes.hiddenAt = hidden_date;
+    this.data.attributes.isHidden = true;
+    context.props.context.props.post.freshness = new Date();
+    m.redraw();
+  }
+
+  restoreComment(context) {
+    this.pushAttributes({hidden_at: null});
+    this.save({ isHidden: false });
+    this.data.attributes.hiddenAt = null;
+    this.data.attributes.isHidden = false;
+    context.props.context.props.post.freshness = new Date();
+    m.redraw();
+  }
+
   flagComment(context) {
     app.modal.show(new FlagPostModal({comment: this}))
   };
@@ -145,6 +164,8 @@ export default class CommentsList extends Component {
             post={this.props.post}
             comment={comment}
             flagComment={this.flagComment.bind(comment,this)}
+            hideComment={this.hideComment.bind(comment,this)}
+            restoreComment={this.restoreComment.bind(comment,this)}
             replyComment={this.replyComment.bind(comment, this)}
             likeComment={this.likeComment.bind(comment, this)}
             editComment={this.editComment.bind(comment, this)}

@@ -45,7 +45,8 @@ class Comment extends AbstractModel
 
     protected $dates = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'hidden_at'
     ];
 
     /**
@@ -129,6 +130,7 @@ class Comment extends AbstractModel
      */
     public function revise($content, User $actor)
     {
+        // TODO add permission check
         if ($this->content !== $content) {
             $this->content = $content;
 
@@ -138,6 +140,30 @@ class Comment extends AbstractModel
             $this->raise(new Revised($this));
         }
 
+        return $this;
+    }
+
+    /**
+     * Hide the post's content.
+     *
+     * @param User $actor
+     * @return $this
+     */
+    public function hide(User $actor)
+    {
+        $this->hidden_at = Carbon::now();
+        return $this;
+    }
+
+    /**
+     * Restore the post's content.
+     *
+     * @param User $actor
+     * @return $this
+     */
+    public function restore()
+    {
+        $this->hidden_at = null;
         return $this;
     }
 }

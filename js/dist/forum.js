@@ -339,7 +339,9 @@ function (_Component) {
     console.log("Flags", comment, likes, comment_flags);
     return m("div", {
       className: "comment-item"
-    }, m("div", null, m("div", {
+    }, m("div", {
+      style: comment.isHidden() ? 'opacity: 0.5' : ''
+    }, m("div", {
       className: "comment-avatar"
     }, flarum_helpers_avatar__WEBPACK_IMPORTED_MODULE_4___default()(user, {
       style: "width: 32px; height: 32px;"
@@ -369,7 +371,11 @@ function (_Component) {
       className: "Button Button--link",
       icon: "fas fa-flag",
       onclick: this.props.flagComment
-    }, app.translator.trans('flarum-flags.forum.post_controls.flag_button')) : '', comment.data.attributes.canHide ? m(flarum_components_Button__WEBPACK_IMPORTED_MODULE_2___default.a, {
+    }, app.translator.trans('flarum-flags.forum.post_controls.flag_button')) : '', comment.data.attributes.canHide ? comment.isHidden() ? m(flarum_components_Button__WEBPACK_IMPORTED_MODULE_2___default.a, {
+      className: "Button Button--link",
+      icon: "far fa-eye",
+      onclick: this.props.restoreComment
+    }, app.translator.trans('core.forum.post_controls.restore_button')) : m(flarum_components_Button__WEBPACK_IMPORTED_MODULE_2___default.a, {
       className: "Button Button--link",
       icon: "far fa-eye-slash",
       onclick: this.props.hideComment
@@ -716,6 +722,33 @@ function (_Component) {
     });
   };
 
+  _proto.hideComment = function hideComment(context) {
+    var hidden_date = new Date();
+    this.pushAttributes({
+      hidden_at: hidden_date
+    });
+    this.save({
+      isHidden: true
+    });
+    this.data.attributes.hiddenAt = hidden_date;
+    this.data.attributes.isHidden = true;
+    context.props.context.props.post.freshness = new Date();
+    m.redraw();
+  };
+
+  _proto.restoreComment = function restoreComment(context) {
+    this.pushAttributes({
+      hidden_at: null
+    });
+    this.save({
+      isHidden: false
+    });
+    this.data.attributes.hiddenAt = null;
+    this.data.attributes.isHidden = false;
+    context.props.context.props.post.freshness = new Date();
+    m.redraw();
+  };
+
   _proto.flagComment = function flagComment(context) {
     app.modal.show(new _FlagPostModal__WEBPACK_IMPORTED_MODULE_5__["default"]({
       comment: this
@@ -733,6 +766,8 @@ function (_Component) {
         post: _this2.props.post,
         comment: comment,
         flagComment: _this2.flagComment.bind(comment, _this2),
+        hideComment: _this2.hideComment.bind(comment, _this2),
+        restoreComment: _this2.restoreComment.bind(comment, _this2),
         replyComment: _this2.replyComment.bind(comment, _this2),
         likeComment: _this2.likeComment.bind(comment, _this2),
         editComment: _this2.editComment.bind(comment, _this2),
